@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-hud: 'Rajdhani', sans-serif;
+    --font-display: 'Orbitron', sans-serif;
+  }
+  
+  body {
+    font-family: var(--font-hud);
+    background-color: #050608;
+    color: #e4e4e7;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+  }
+}
+
+.font-hud {
+  font-family: 'Rajdhani', -apple-system, sans-serif;
+}
+
+.font-mono-tech {
+  font-family: 'Share Tech Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+.font-display {
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+}
+
+/* Tasteful Aerospace Frosted Panel */
+.telemetry-panel {
+  background: rgba(10, 12, 16, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.telemetry-panel-elevated {
+  background: rgba(13, 16, 22, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Subtle Reticle Hairlines */
+.hairline-border {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Cinematic Floating & Orbital Motion Effects */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(1.2deg); }
+}
+
+@keyframes floatDelay {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(7px) rotate(-1.2deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; transform: scale(0.98); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+
+@keyframes scanLine {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: floatDelay 7.5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-scan {
+  animation: scanLine 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
