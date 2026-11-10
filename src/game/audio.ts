@@ -6,6 +6,28 @@ let noiseBuf: AudioBuffer;
 let musicGain: GainNode | null = null;
 let musicTimer: ReturnType<typeof setInterval> | null = null;
 const musicNodes = new Set<AudioNode>();
+let cachedVoice: SpeechSynthesisVoice | null = null;
+
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  const loadVoices = () => {
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      cachedVoice =
+        voices.find(
+          (v) =>
+            v.lang.startsWith("en") &&
+            (v.name.includes("Natural") ||
+              v.name.includes("Google") ||
+              v.name.includes("Samantha") ||
+              v.name.includes("Daniel")),
+        ) || voices[0] || null;
+    } catch {
+      // Ignored
+    }
+  };
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
 
 function noiseSrc() {
   if (!ctx) throw new Error("Audio not initialized");
@@ -242,30 +264,41 @@ export const audio = {
     o.stop(t + 0.08);
   },
 
-  /** Mission Control Voice Callout */
+  /** Authentic Apollo / Deep Space Radio Comm Chirp */
+  commChirp() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(1250, t);
+    o.frequency.exponentialRampToValueAtTime(1750, t + 0.04);
+    g.gain.setValueAtTime(0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    o.connect(g).connect(master);
+    o.start(t);
+    o.stop(t + 0.06);
+  },
+
+  /** Mission Control Voice Callout (Non-blocking & Zero Jank) */
   voice(text: string) {
     if (!this.voiceEnabled) return;
+    this.commChirp();
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.05;
-      u.pitch = 1.0;
-      u.volume = 0.85;
-      const voices = window.speechSynthesis.getVoices();
-      const eng = voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.includes("Natural") ||
-            v.name.includes("Google") ||
-            v.name.includes("Samantha") ||
-            v.name.includes("Daniel")),
-      );
-      if (eng) u.voice = eng;
-      window.speechSynthesis.speak(u);
-    } catch {
-      // Audio fallback already provides beeps
-    }
+    // Defer SpeechSynthesis call asynchronously to prevent blocking the WebGL animation frame
+    setTimeout(() => {
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 1.05;
+        u.pitch = 1.0;
+        u.volume = 0.75;
+        if (cachedVoice) u.voice = cachedVoice;
+        window.speechSynthesis.speak(u);
+      } catch {
+        // Audio fallback already provides beeps
+      }
+    }, 10);
   },
 
   /**
@@ -334,6 +367,9 @@ export const audio = {
       subGain.gain.setValueAtTime(0.0001, now);
       subGain.gain.exponentialRampToValueAtTime(0.16, now + 3.0);
       subGain.gain.exponentialRampToValueAtTime(0.0001, now + chordDuration);
+      subOsc.onended = () => {
+        musicNodes.delete(subOsc);
+      };
       subOsc.connect(subGain).connect(bus);
       subOsc.start(now);
       subOsc.stop(now + chordDuration + 0.1);
@@ -364,6 +400,9 @@ export const audio = {
           voiceGain.gain.exponentialRampToValueAtTime(level, now + 3.2);
           voiceGain.gain.exponentialRampToValueAtTime(0.0001, now + chordDuration);
 
+          osc.onended = () => {
+            musicNodes.delete(osc);
+          };
           osc.connect(lpf).connect(voiceGain).connect(bus);
           osc.start(now);
           osc.stop(now + chordDuration + 0.1);
@@ -388,6 +427,9 @@ export const audio = {
         chimeGain.gain.exponentialRampToValueAtTime(0.022, chimeNow + 0.4);
         chimeGain.gain.exponentialRampToValueAtTime(0.0001, chimeNow + 4.5);
 
+        chimeOsc.onended = () => {
+          musicNodes.delete(chimeOsc);
+        };
         chimeOsc.connect(bellFilter).connect(chimeGain).connect(bus);
         chimeOsc.start(chimeNow);
         chimeOsc.stop(chimeNow + 4.8);

@@ -174,16 +174,16 @@ export function HUD() {
           );
         })}
 
-      {/* --- RIGHT-SIDE COMPACT APPROACH SCOPE (ULTRA-SLIM, NON-INTRUSIVE) --- */}
+      {/* --- RIGHT-SIDE COMPACT APPROACH SCOPE WITH MINI SIDE-VIEW PROFILE --- */}
       {sim.dockingRadar.active && !isDocked && (
-        <div className="pointer-events-auto absolute right-4 sm:right-6 top-16 w-44 sm:w-48 rounded-xl border border-white/15 bg-[#090d14]/90 p-2.5 shadow-xl transition-all duration-200">
+        <div className="pointer-events-auto absolute right-4 sm:right-6 top-16 w-48 sm:w-52 rounded-2xl border border-white/15 bg-[#080c14]/75 backdrop-blur-sm p-2.5 shadow-xl transition-all duration-200">
           {/* Header: Target Name & Alignment */}
           <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[9px] font-mono-tech">
-            <span className="font-bold text-zinc-200 truncate max-w-[95px]">
+            <span className="font-bold text-zinc-200 truncate max-w-[110px]">
               {sim.dockingRadar.targetName}
             </span>
             <span
-              className={`font-bold px-1 py-0.2 rounded text-[8px] ${
+              className={`font-bold px-1.5 py-0.2 rounded text-[8px] ${
                 sim.dockingRadar.alignPct > 80
                   ? "text-emerald-400 bg-emerald-950/60"
                   : "text-amber-400 bg-amber-950/60"
@@ -193,20 +193,20 @@ export function HUD() {
             </span>
           </div>
 
-          {/* Compact Vector Boresight Scope */}
-          <div className="relative my-2 h-18 w-full rounded-lg border border-white/10 bg-black/70 flex items-center justify-center overflow-hidden">
+          {/* 1. TOP: COMPACT BORESIGHT SCOPE (AZIMUTH / ELEVATION) */}
+          <div className="relative mt-2 h-16 w-full rounded-lg border border-white/10 bg-black/50 flex items-center justify-center overflow-hidden">
             {/* Crosshair Grid */}
             <div className="absolute inset-x-0 h-px bg-white/15" />
             <div className="absolute inset-y-0 w-px bg-white/15" />
-            <div className="absolute h-12 w-12 rounded-full border border-white/10" />
-            <div className="absolute h-5 w-5 rounded-full border border-emerald-400/30" />
+            <div className="absolute h-11 w-11 rounded-full border border-white/10" />
+            <div className="absolute h-4.5 w-4.5 rounded-full border border-emerald-400/30" />
 
-            {/* Target Pip */}
+            {/* Target Aim Pip */}
             {(() => {
-              const scale = 2.4;
-              const px = Math.max(-28, Math.min(28, (sim.dockingRadar.offsetX || 0) * scale));
-              const py = Math.max(-28, Math.min(28, -(sim.dockingRadar.offsetY || 0) * scale));
-              const isCentered = Math.hypot(px, py) < 6;
+              const scale = 2.2;
+              const px = Math.max(-26, Math.min(26, (sim.dockingRadar.offsetX || 0) * scale));
+              const py = Math.max(-26, Math.min(26, -(sim.dockingRadar.offsetY || 0) * scale));
+              const isCentered = Math.hypot(px, py) < 5.5;
 
               return (
                 <div
@@ -229,22 +229,98 @@ export function HUD() {
             })()}
           </div>
 
-          {/* Compact Telemetry Strip */}
-          <div className="flex items-center justify-between text-[8px] font-mono-tech text-zinc-400">
-            <span>
-              <strong className="text-white text-[9px]">{sim.dockingRadar.range.toFixed(1)}m</strong>
+          {/* 2. BOTTOM: SMALL TRANSPARENT SIDE-PROFILE VIEW (Z-DISTANCE TO CRAFT NOSE) */}
+          <div className="relative mt-1.5 h-12 w-full rounded-lg border border-white/10 bg-black/50 p-1.5 flex flex-col justify-between overflow-hidden">
+            {/* Profile Track Row */}
+            <div className="relative my-auto flex items-center w-full h-5">
+              {/* Spacecraft Bow with Responsive Articulated Paddles */}
+              <div className="relative flex items-center z-10 shrink-0">
+                {/* Nose Hub */}
+                <div className="h-4.5 w-2 rounded-l-xs bg-zinc-300 border-l border-white/60 shadow-xs" />
+                {/* Upper Capture Paddle */}
+                <div
+                  className={`absolute -right-2 top-0 h-0.5 w-2 rounded-xs bg-white transition-transform duration-150 origin-left ${
+                    sim.capturedDebrisId
+                      ? "rotate-20 bg-emerald-300"
+                      : sim.captureArmState > 0.05
+                      ? "-rotate-45 bg-emerald-300 shadow-[0_0_4px_#34d399]"
+                      : "rotate-0"
+                  }`}
+                />
+                {/* Lower Capture Paddle */}
+                <div
+                  className={`absolute -right-2 bottom-0 h-0.5 w-2 rounded-xs bg-white transition-transform duration-150 origin-left ${
+                    sim.capturedDebrisId
+                      ? "-rotate-20 bg-emerald-300"
+                      : sim.captureArmState > 0.05
+                      ? "rotate-45 bg-emerald-300 shadow-[0_0_4px_#34d399]"
+                      : "rotate-0"
+                  }`}
+                />
+              </div>
+
+              {/* Laser Approach Range Rail */}
+              <div className="relative flex-1 h-1 bg-zinc-800/80 rounded-full mx-2 overflow-hidden border border-white/10">
+                {/* Latch Range (0 to 4.2m) */}
+                <div className="absolute left-0 inset-y-0 w-[28%] bg-emerald-500/50" />
+                {/* Terminal Approach (4.2m to 14m) */}
+                <div className="absolute left-[28%] inset-y-0 w-[50%] bg-amber-500/30" />
+              </div>
+
+              {/* Dynamic Sliding Satellite Icon */}
+              {(() => {
+                // Map range 0m..18m to rail position (0m is right at the paddles)
+                const zDist = Math.max(0, sim.dockingRadar.range);
+                // Rail travel width is ~95px; offset from left is (zDist / 18) * 95
+                const leftPos = Math.min(95, Math.max(0, (zDist / 18) * 95));
+
+                return (
+                  <div
+                    className="absolute transition-all duration-75 flex items-center justify-center pointer-events-none"
+                    style={{ left: `calc(16px + ${leftPos}px)` }}
+                  >
+                    <div
+                      className={`h-2.5 w-2.5 rounded-xs border transition-colors ${
+                        sim.capturedDebrisId
+                          ? "border-emerald-400 bg-emerald-400 shadow-[0_0_6px_#34d399]"
+                          : sim.dockingRadar.range <= 4.2
+                          ? "border-emerald-300 bg-emerald-400/90 shadow-[0_0_6px_#34d399] animate-pulse"
+                          : "border-amber-400 bg-amber-500/90 shadow-[0_0_4px_#fbbf24]"
+                      }`}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Distance Markers underneath rail */}
+            <div className="flex justify-between text-[7px] font-mono-tech text-zinc-500 leading-none">
+              <span className="text-emerald-400 font-bold">0M (CATCH)</span>
+              <span>4.2M</span>
+              <span>14M+</span>
+            </div>
+          </div>
+
+          {/* 3. COMPACT TELEMETRY FOOTER */}
+          <div className="mt-1.5 flex items-center justify-between text-[9px] font-mono-tech">
+            <span className="text-white font-bold">
+              {sim.dockingRadar.range.toFixed(1)}m
             </span>
-            <span>
-              <strong className={sim.dockingRadar.relSpeed > 3.0 ? "text-red-400" : "text-zinc-200"}>
-                {sim.dockingRadar.relSpeed.toFixed(1)} m/s
-              </strong>
+            <span
+              className={`font-semibold ${
+                sim.dockingRadar.relSpeed > 3.0 && sim.captureArmState <= 0.05
+                  ? "text-red-400 animate-pulse"
+                  : "text-zinc-300"
+              }`}
+            >
+              {sim.dockingRadar.relSpeed.toFixed(1)} m/s
             </span>
           </div>
 
           {/* In-Range Prompt Indicator (Sleek badge, no massive button) */}
-          {sim.dockingRadar.range <= 4.2 && (
-            <div className="mt-1.5 text-center rounded bg-emerald-500/25 border border-emerald-400/50 py-0.5 text-[8px] font-mono-tech text-emerald-300 font-bold animate-pulse">
-              [F] TO CAPTURE
+          {sim.dockingRadar.range <= 4.2 && !sim.capturedDebrisId && (
+            <div className="mt-1 text-center rounded bg-emerald-500/25 border border-emerald-400/50 py-0.5 text-[8px] font-mono-tech text-emerald-300 font-bold animate-pulse">
+              [F] TO CATCH DEBRIS
             </div>
           )}
         </div>

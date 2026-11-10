@@ -148,7 +148,7 @@ export function SimLoop() {
         sim.hull = Math.min(100, sim.hull + 120 * dt);
 
         rechargeAudioTimer += dt;
-        if (rechargeAudioTimer >= 0.08) {
+        if (rechargeAudioTimer >= 0.22) {
           audio.rechargeHum(sim.fuel / FUEL_CAPACITY);
           rechargeAudioTimer = 0;
         }
