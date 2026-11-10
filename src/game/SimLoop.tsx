@@ -335,7 +335,7 @@ export function SimLoop() {
         sim.dockingRadar.collisionHazard = closestDist <= 3.5 && sim.captureArmState <= 0.05;
 
         // Relative lateral offset for docking display
-        const toDebrisLocal = closestDeb.pos.clone().sub(sim.pos).applyQuaternion(sim.quat.clone().invert());
+        const toDebrisLocal = T1.copy(closestDeb.pos).sub(sim.pos).applyQuaternion(DQ.copy(sim.quat).invert());
         sim.dockingRadar.offsetX = toDebrisLocal.x;
         sim.dockingRadar.offsetY = toDebrisLocal.y;
         sim.dockingRadar.offsetZ = toDebrisLocal.z;
@@ -390,8 +390,8 @@ export function SimLoop() {
     if (sim.view === 0) {
       // Optical Bow Sensor Cam
       const fwd = T1.set(0, 0, 1).applyQuaternion(sim.quat);
-      cam.position.copy(sim.pos).add(fwd.clone().multiplyScalar(1.5));
-      cam.lookAt(T2.copy(sim.pos).add(fwd.clone().multiplyScalar(100)));
+      cam.position.copy(sim.pos).addScaledVector(fwd, 1.5);
+      cam.lookAt(T2.copy(sim.pos).addScaledVector(fwd, 100));
       cam.fov = sim.boosting ? 70 : 62;
       cam.updateProjectionMatrix();
     } else if (sim.view === 1) {

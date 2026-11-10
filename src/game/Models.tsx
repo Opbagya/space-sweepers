@@ -722,15 +722,26 @@ export function DebrisItem({ target }: { target: DebrisTarget }) {
       {target.type === "rocket_stage" && (
         <group>
           {/* Main Propellant Tank Casing: Authentic ISRO Maroon-Copper Thermal Insulation */}
-          <mesh material={mats.ps4Thermal} castShadow>
+          <mesh material={mats.ps4Thermal}>
             <cylinderGeometry args={[1.4, 1.4, 5.2, 32]} />
           </mesh>
-          {/* Equipment Bay Avionics Ring: High-Visibility White & Titanium Bands */}
+          {/* Equipment Bay Avionics Ring: Open-ended sleeve collar to prevent coplanar Z-fighting */}
           <mesh material={mats.whiteChassis} position={[0, 2.3, 0]}>
-            <cylinderGeometry args={[1.42, 1.42, 0.6, 32]} />
+            <cylinderGeometry args={[1.42, 1.42, 0.58, 32, 1, true]} />
           </mesh>
+          {/* Top Payload Adapter Bulkhead & Interface Ring (Positioned slightly proud to eliminate surface tearing) */}
+          <mesh material={mats.titanium} position={[0, 2.61, 0]}>
+            <cylinderGeometry args={[0.95, 1.35, 0.16, 32]} />
+          </mesh>
+          <mesh material={mats.darkStructural} position={[0, 2.7, 0]}>
+            <cylinderGeometry args={[0.85, 0.85, 0.04, 32]} />
+          </mesh>
+          {/* Aft Engine Skirt & Heat Shield Plate */}
           <mesh material={mats.titanium} position={[0, -2.7, 0]}>
             <cylinderGeometry args={[1.42, 1.55, 1.2, 32, 1, true]} />
+          </mesh>
+          <mesh material={mats.darkStructural} position={[0, -2.605, 0]}>
+            <cylinderGeometry args={[1.38, 1.38, 0.03, 32]} />
           </mesh>
           {/* Dual ISRO PS4 Gimbaled Liquid Rocket Engines */}
           {[-0.45, 0.45].map((x, i) => (
@@ -888,14 +899,14 @@ export function DebrisItem({ target }: { target: DebrisTarget }) {
       {target.type === "sensor_bus" && (
         <group>
           {/* Main Spacecraft Bus: High-Albedo Gold Kapton MLI Thermal Blanket with Silver Collar */}
-          <mesh material={mats.gold} castShadow>
+          <mesh material={mats.gold}>
             <cylinderGeometry args={[1.1, 1.1, 2.2, 24]} />
           </mesh>
-          <mesh material={mats.silver} position={[0, 1.12, 0]}>
-            <cylinderGeometry args={[1.12, 1.12, 0.08, 24]} />
+          <mesh material={mats.silver} position={[0, 1.02, 0]}>
+            <cylinderGeometry args={[1.12, 1.12, 0.12, 24, 1, true]} />
           </mesh>
-          <mesh material={mats.silver} position={[0, -1.12, 0]}>
-            <cylinderGeometry args={[1.12, 1.12, 0.08, 24]} />
+          <mesh material={mats.silver} position={[0, -1.02, 0]}>
+            <cylinderGeometry args={[1.12, 1.12, 0.12, 24, 1, true]} />
           </mesh>
           {/* Payload Module Equipment Box */}
           <mesh material={mats.whiteChassis} position={[0, 0, 0.6]}>

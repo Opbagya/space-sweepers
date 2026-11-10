@@ -14,16 +14,13 @@ export function SpaceScene() {
     <div className="absolute inset-0 w-full h-full">
       <Canvas
         camera={{ position: [0, 4, -14], fov: 60, near: 0.2, far: 50000 }}
-        dpr={[1, 1.5]}
+        dpr={[1, 1.25]}
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.25,
           powerPreference: "high-performance",
-        }}
-        shadows
-        onCreated={({ gl }) => {
-          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          depth: true,
         }}
       >
         {/* Deep Cosmic Starfield */}
@@ -37,20 +34,10 @@ export function SpaceScene() {
           speed={0.4}
         />
 
-        {/* Primary Sun Directional Light */}
+        {/* Primary Sun Directional Light (Direct Crisp Illumination) */}
         <directionalLight
           position={[SUN_DIR.x * 220, SUN_DIR.y * 220, SUN_DIR.z * 220]}
           intensity={4.2}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-          shadow-camera-near={10}
-          shadow-camera-far={600}
-          shadow-camera-left={-50}
-          shadow-camera-right={50}
-          shadow-camera-top={50}
-          shadow-camera-bottom={-50}
-          shadow-bias={-0.0001}
         />
 
         {/* Secondary Soft Fill Light (Atmospheric Sun Scatter Fill) */}
